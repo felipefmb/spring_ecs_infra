@@ -1,0 +1,38 @@
+name: Deploy Release to Production and Promote
+
+on:
+  push:
+    branches:
+      - 'release-*'
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  deploy-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Deploy Infra Production
+        run: echo "Deploy infra production aqui"
+
+      - name: Create Tag
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag v${GITHUB_REF_NAME#release-}
+          git push origin v${GITHUB_REF_NAME#release-}
+
+      - name: Create Pull Request to Main
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'Promote Release ${{ GITHUB_REF_NAME }} -> main'
+          body: 'Automated PR from ${{ GITHUB_REF_NAME }} to main.'
+          base: main
+          branch: ${{ github.ref_name }}

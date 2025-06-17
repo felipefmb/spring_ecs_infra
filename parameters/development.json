@@ -1,0 +1,4 @@
+[
+  { "ParameterKey": "Environment", "ParameterValue": "development" },
+  { "ParameterKey": "AccountId", "ParameterValue": "123456789012" }
+]

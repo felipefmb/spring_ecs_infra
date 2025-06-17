@@ -1,0 +1,31 @@
+name: Deploy Development and Promote
+
+on:
+  push:
+    branches:
+      - development
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  deploy-and-promote:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Deploy Infra Development
+        run: echo "Deploy infra development aqui"
+
+      - name: Create Pull Request to Homologation
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'Promote Development -> Homologation'
+          body: 'Automated PR from development to homologation.'
+          base: homologation
+          branch: development

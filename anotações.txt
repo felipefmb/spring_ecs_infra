@@ -1,0 +1,26 @@
+Executar a primeira vez apenas:
+
+* Use este comando AWS CLI (executado na sua máquina local ou CloudShell AWS):
+aws iam create-open-id-connect-provider \
+    --url https://token.actions.githubusercontent.com \
+    --client-id-list sts.amazonaws.com \
+    --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1
+
+* Configurar Secrets no GitHub
+AWS_ACCOUNT_ID	Seu ID da conta AWS	123456789012
+REPO_OWNER	Seu username ou organização no GitHub	felipefmb
+- O repositório (GITHUB_REPO) é opcional pois podemos obter diretamente com ${{ github.repository }}.
+- Não precisa de access key nem secret key AWS!
+
+. Gerenciar as Branches de Fluxo
+development	Deploy em Dev + Cria PR para homologation
+homologation	Deploy em Homolog + Cria branch release-<versao>
+release-<versao>	Deploy em Produção + Cria Tag + Cria PR para main
+main	Consolidado das releases
+
+4. Permissão mínima no GitHub Actions para fazer PRs e Tags
+Não precisa configurar nada além de garantir que o token padrão ${{ secrets.GITHUB_TOKEN }} tenha:
+- contents: write
+- pull-requests: write
+Obs.: Isso já vem habilitado por padrão.
+
