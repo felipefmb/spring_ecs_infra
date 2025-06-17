@@ -10,7 +10,7 @@ if [ -z "$ENV" ] || [ -z "$ACCOUNT_ID" ]; then
   exit 1
 fi
 
-AWS_REGION="us-east-1"
+#AWS_REGION="us-east-1"
 
 echo "Deploying VPC..."
 aws cloudformation deploy \

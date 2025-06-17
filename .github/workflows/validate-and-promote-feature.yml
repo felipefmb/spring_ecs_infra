@@ -3,8 +3,8 @@ name: Validate Infra and Promote to Development
 on:
   push:
     branches:
-      - 'feature-*'
       - 'feature/**'
+      - 'feature-*'
   workflow_dispatch:
 
 permissions:
@@ -14,6 +14,7 @@ permissions:
 jobs:
   validate-and-promote:
     runs-on: ubuntu-latest
+    environment: development
 
     steps:
       - name: Checkout
@@ -23,7 +24,7 @@ jobs:
         run: |
           for template in cloudformation/*.yml; do
             echo "Validating $template"
-            aws cloudformation validate-template --template-body file://$template || exit 1
+            aws cloudformation validate-template --region ${{ vars.AWS_REGION }} --template-body file://$template || exit 1
           done
 
       - name: Create Pull Request to Development

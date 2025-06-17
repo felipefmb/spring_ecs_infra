@@ -12,6 +12,10 @@ REPO_OWNER	Seu username ou organização no GitHub	felipefmb
 - O repositório (GITHUB_REPO) é opcional pois podemos obter diretamente com ${{ github.repository }}.
 - Não precisa de access key nem secret key AWS!
 
+Configurar Environment Variables no github:
+Name: AWS_REGION
+Value: us-east-1
+
 . Gerenciar as Branches de Fluxo
 development	Deploy em Dev + Cria PR para homologation
 homologation	Deploy em Homolog + Cria branch release-<versao>

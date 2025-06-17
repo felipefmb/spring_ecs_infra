@@ -1,31 +1,37 @@
-name: Deploy Development and Promote
+name: Validate Infra and Promote to Homologation
 
 on:
   push:
     branches:
-      - development
+      - 'feature/**'
+      - 'feature-*'
+  workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: write
   pull-requests: write
 
 jobs:
-  deploy-and-promote:
+  validate-and-promote:
     runs-on: ubuntu-latest
+    environment: homologation
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Deploy Infra Development
-        run: echo "Deploy infra development aqui"
+      - name: Validate CloudFormation
+        run: |
+          for template in cloudformation/*.yml; do
+            echo "Validating $template"
+            aws cloudformation validate-template --region ${{ vars.AWS_REGION }} --template-body file://$template || exit 1
+          done
 
       - name: Create Pull Request to Homologation
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: 'Promote Development -> Homologation'
-          body: 'Automated PR from development to homologation.'
+          title: 'Promote Feature -> Homologation'
+          body: 'Automated PR from feature to homologation.'
           base: homologation
-          branch: development
+          branch: ${{ github.ref_name }}

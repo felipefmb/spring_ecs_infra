@@ -1,46 +1,37 @@
-name: Deploy Homologation and Create Release
+name: Validate Infra and Promote to Release
 
 on:
   push:
     branches:
-      - homologation
+      - 'feature/**'
+      - 'feature-*'
+  workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: write
   pull-requests: write
 
 jobs:
-  deploy-and-create-release:
+  validate-and-promote:
     runs-on: ubuntu-latest
+    environment: release
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Deploy Infra Homologation
-        run: echo "Deploy infra homologation aqui"
-
-      - name: Get Next Version
-        id: get_version
+      - name: Validate CloudFormation
         run: |
-          git fetch --tags
-          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-          if [ -z "$latest_tag" ]; then
-            next_version="1.0.0"
-          else
-            version_core=${latest_tag#v}
-            major=$(echo $version_core | cut -d. -f1)
-            minor=$(echo $version_core | cut -d. -f2)
-            patch=$(echo $version_core | cut -d. -f3)
-            patch=$((patch + 1))
-            next_version="${major}.${minor}.${patch}"
-          fi
-          echo "NEXT_VERSION=$next_version" >> $GITHUB_ENV
+          for template in cloudformation/*.yml; do
+            echo "Validating $template"
+            aws cloudformation validate-template --region ${{ vars.AWS_REGION }} --template-body file://$template || exit 1
+          done
 
-      - name: Create Release Branch
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git checkout -b release-${{ env.NEXT_VERSION }}
-          git push origin release-${{ env.NEXT_VERSION }}
+      - name: Create Pull Request to Release
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'Promote Feature -> Release'
+          body: 'Automated PR from feature to release.'
+          base: release
+          branch: ${{ github.ref_name }}
