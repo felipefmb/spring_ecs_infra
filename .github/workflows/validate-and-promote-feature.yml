@@ -3,6 +3,7 @@ name: Validate Infra and Promote to Development
 on:
   push:
     branches:
+      - 'feature-*'
       - 'feature/**'
   workflow_dispatch:
 
